@@ -4,7 +4,7 @@
   <header class="article-header">
     <div class="article-meta" style="margin-bottom: 0.75rem;">
       {{ if and .Section (ne .Section $standalone) (ne .Section "search") }}
-        <a href="/{{ .Section }}/" class="collection-badge">
+        <a href="{{ with site.GetPage (printf "/%s" .Section) }}{{ .RelPermalink }}{{ else }}{{ (printf "%s/" .Section) | relURL }}{{ end }}" class="collection-badge">
           &larr; {{ with site.GetPage (printf "/%s" .Section) }}{{ .Title }}{{ else }}{{ $.Section }}{{ end }}
         </a>
       {{ end }}
