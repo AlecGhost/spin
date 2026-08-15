@@ -1,9 +1,9 @@
 baseURL = "/"
 defaultContentLanguage = "en"
-title = "Logbook"
+title = "Spin Demo"
 theme = "spin"
+themesDir = "../.."
 enableRobotsTXT = true
-
 
 [languages]
   [languages.en]
@@ -38,7 +38,7 @@ enableRobotsTXT = true
 
 [params]
   author = "AlecGhost"
-  brand = "AlecGhost/Logbook"
-  description = "A minimalist personal logbook, engineering notes, and tabletop campaigns."
+  brand = "AlecGhost/Spin"
+  description = "A minimalist, dark-themed Hugo module demo."
   standaloneSection = "notes"
-  github = "https://github.com/AlecGhost"
+  github = "https://github.com/AlecGhost/spin"
