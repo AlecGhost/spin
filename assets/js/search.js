@@ -262,6 +262,8 @@
     resultsContainer.innerHTML = html;
   }
 
+  const modalCloseBtn = document.getElementById('search-modal-close');
+
   async function performModalSearch() {
     await loadSearchData();
     const query = searchInput ? searchInput.value.trim() : '';
@@ -272,6 +274,7 @@
   function openSearchModal() {
     if (!modal) return;
     modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
     loadSearchData().then(() => {
       performModalSearch();
       if (searchInput) {
@@ -284,6 +287,7 @@
   function closeSearchModal() {
     if (!modal) return;
     modal.classList.remove('open');
+    document.body.style.overflow = '';
     if (searchInput) searchInput.value = '';
     selectedIndex = -1;
   }
@@ -345,6 +349,13 @@
       if (e.target === modal) {
         closeSearchModal();
       }
+    });
+  }
+
+  if (modalCloseBtn) {
+    modalCloseBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      closeSearchModal();
     });
   }
 

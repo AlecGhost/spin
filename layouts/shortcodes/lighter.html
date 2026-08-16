@@ -24,7 +24,7 @@
       <span class="codebox-title">{{ $title }}</span>
     </div>
 
-    <div style="display: flex; align-items: center; gap: 0.5rem;">
+    <div class="codebox-actions">
       {{ with $lang }}<span class="codebox-lang">{{ . }}</span>{{ end }}
       <button class="codebox-copy-btn" onclick="copyCodebox(this)">Copy</button>
     </div>
