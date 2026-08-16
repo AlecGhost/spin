@@ -7,7 +7,6 @@
 - **Minimalist Dark Aesthetic**: Sharp typography, slate/charcoal tones, flat contrast, **strictly no gradients**.
 - **Dynamic Collections**: Automatically detects and renders navigation, cards, filter tabs, and breadcrumbs from any folder under `content/` without hardcoded menus.
 - **Standalone Notes Category**: Mark general notes to appear in the overview and global search without creating a collection card or tab.
-- **Pre-rendered AST Syntax Highlighting**: Custom code block shortcode supporting external HTML tokens (e.g. from [Lighter](https://github.com/AlecGhost/lighter)) styled with Catppuccin Mocha.
 - **Instant Full-Text & Multi-Field Search**: Client-side fuzzy and keyword search with collection filtering tabs and match snippet highlighting.
 - **Separate Homepage & Overview**: 3x2 square recent entry grid on the homepage and a chronological archive on `/overview/`.
 
@@ -53,14 +52,6 @@ theme = "spin"
   description = "A minimalist personal site."
   standaloneSection = "notes"
   github = "https://github.com/YourUsername"
-```
-
-### 3. Using the Lighter Syntax Shortcode
-
-Place pre-rendered AST HTML files inside `data/code/` (e.g. `data/code/example.html`) and reference them:
-
-```markdown
-{{< lighter file="example.html" title="example.rs" lang="Rust" >}}
 ```
 
 ## License

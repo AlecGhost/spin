@@ -14,9 +14,6 @@
   {{ partial "search-modal.html" . }}
 
   {{ $search := resources.Get "js/search.js" }}
-  {{ $codebox := resources.Get "js/codebox.js" }}
-
   {{ with $search }}<script src="{{ .RelPermalink }}"></script>{{ end }}
-  {{ with $codebox }}<script src="{{ .RelPermalink }}"></script>{{ end }}
 </body>
 </html>

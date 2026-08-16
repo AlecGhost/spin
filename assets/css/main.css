@@ -659,110 +659,6 @@ img {
   border-radius: var(--radius-md);
 }
 
-/* ==========================================================================
-   CODE BOX & CUSTOM SYNTAX HIGHLIGHTER CONTAINER
-   ========================================================================== */
-
-.codebox {
-  background-color: var(--code-bg);
-  border: 1px solid var(--code-border);
-  border-radius: var(--radius-md);
-  margin: 1.75rem 0;
-  overflow: hidden;
-  max-width: 100%;
-}
-
-.codebox-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.5rem 0.9rem;
-  background-color: #11111b;
-  border-bottom: 1px solid var(--code-border);
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  user-select: none;
-  gap: 0.5rem;
-}
-
-.codebox-title-group {
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  flex: 1;
-}
-
-.codebox-title {
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.codebox-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-shrink: 0;
-}
-
-.codebox-lang {
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  text-transform: uppercase;
-  color: var(--text-muted);
-  background: #181825;
-  border: 1px solid var(--code-border);
-  padding: 0.1rem 0.4rem;
-  border-radius: var(--radius-sm);
-}
-
-.codebox-copy-btn {
-  background: #1e1e2e;
-  border: 1px solid #313244;
-  color: #a6adc8;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  transition: all var(--transition);
-  touch-action: manipulation;
-}
-
-.codebox-copy-btn:hover {
-  background: #313244;
-  color: #cdd6f4;
-  border-color: #45475a;
-}
-
-.codebox-copy-btn:active {
-  background: #45475a;
-}
-
-.codebox-body {
-  padding: 1.25rem;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  line-height: 1.6;
-  white-space: pre;
-  color: #cdd6f4;
-}
-
-.codebox-body pre {
-  margin: 0;
-  font-family: inherit;
-  font-size: inherit;
-  line-height: inherit;
-  white-space: inherit;
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-}
 
 /* ==========================================================================
    SEARCH MODAL & SEARCH PAGE
@@ -1157,14 +1053,6 @@ mark.search-highlight {
     padding: 0.5rem 0 0.5rem 1rem;
   }
 
-  .codebox {
-    margin: 1.25rem 0;
-  }
-
-  .codebox-body {
-    padding: 1rem;
-    font-size: 0.82rem;
-  }
 
   /* Search Modal on Mobile */
   .search-modal-backdrop {

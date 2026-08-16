@@ -5,10 +5,6 @@
 <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ site.Params.description }}{{ end }}">
 <meta name="search-index" content="{{ "index.json" | relURL }}">
 
-{{ $catppuccin := resources.Get "css/catppuccin-mocha.css" }}
-{{ $arborium := resources.Get "css/arborium.css" }}
 {{ $main := resources.Get "css/main.css" }}
-
-{{ with $catppuccin }}<link rel="stylesheet" href="{{ .RelPermalink }}">{{ end }}
-{{ with $arborium }}<link rel="stylesheet" href="{{ .RelPermalink }}">{{ end }}
 {{ with $main }}<link rel="stylesheet" href="{{ .RelPermalink }}">{{ end }}
+
