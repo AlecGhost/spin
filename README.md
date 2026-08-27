@@ -1,57 +1,67 @@
 # spin
 
-**spin** is a minimalist, modern dark-themed theme/module for [Hugo](https://gohugo.io/).
+A minimalist, dark-themed Hugo theme for notes, technical blogs, and documentation.
 
 ## Features
 
-- **Catppuccin Mocha Aesthetic**: Sharp typography styled with the official [Catppuccin Mocha](https://github.com/catppuccin/catppuccin) palette, flat contrast.
-- **Dynamic Collections**: Automatically detects and renders navigation, cards, filter tabs, and breadcrumbs from any folder under `content/` without hardcoded menus.
-- **Standalone Notes Category**: Mark general notes to appear in the overview and global search without creating a collection card or tab.
-- **Instant Full-Text & Multi-Field Search**: Client-side fuzzy and keyword search with collection filtering tabs and match snippet highlighting.
-- **Separate Homepage & Overview**: 3x2 square recent entry grid on the homepage and a chronological archive on `/overview/`.
+- **Auto-detected collections**: Folders in `content/` (e.g. `content/tech/`) automatically generate homepage cards and navigation links.
+- **Standalone notes**: Optional `notes` section for loose posts that appear in search and the timeline without cluttering the main navigation.
+- **Built-in search**: Fast client-side search modal (`⌘K` / `Ctrl+K`) with collection filters and keyword highlighting. Zero external dependencies.
+- **Catppuccin Mocha palette**: Clean, low-contrast dark theme with no CSS frameworks.
 
-## Quick Start
+## Installation
 
-### 1. Installation
+### As a Hugo Module (Recommended)
 
-As a Git submodule in your Hugo site:
-```bash
-git submodule add https://github.com/AlecGhost/spin.git themes/spin
-```
+Add to your `hugo.toml`:
 
-Or as a Hugo Module:
 ```toml
 [module]
   [[module.imports]]
     path = "github.com/AlecGhost/spin"
 ```
 
-### 2. Configuration (`hugo.toml`)
+*(Run `hugo mod init <your-repo>` first if you haven't initialized modules yet).*
+
+### Or as a Git Submodule
+
+```bash
+git submodule add https://github.com/AlecGhost/spin.git themes/spin
+```
+
+And set `theme = "spin"` in `hugo.toml`.
+
+## Minimum Configuration
+
+Add this to your `hugo.toml` to get the site and search running:
 
 ```toml
 baseURL = "/"
 title = "My Site"
-theme = "spin"
 
+[module]
+  [[module.imports]]
+    path = "github.com/AlecGhost/spin"
+
+# Required for search
 [outputs]
   home = ["HTML", "RSS", "JSON"]
-  section = ["HTML", "RSS"]
 
 [outputFormats.JSON]
   mediaType = "application/json"
   baseName = "index"
   isPlainText = true
+```
 
-[markup]
-  [markup.goldmark.renderer]
-    unsafe = true
+## Optional Configuration
 
+```toml
 [params]
-  author = "Your Name"
-  brand = "YourName/SiteTitle"
-  description = "A minimalist personal site."
-  standaloneSection = "notes"
-  github = "https://github.com/YourUsername"
+  brand = "Username/Site"          # Splits into two styled parts in the navbar
+  author = "Your Name"             # Footer author name
+  description = "Site description" # Homepage subtitle and meta description
+  github = "https://github.com/..."# Adds GitHub link to navbar and footer
+  standaloneSection = "notes"      # Section excluded from collection cards (default: "notes")
 ```
 
 ## License

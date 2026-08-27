@@ -4,7 +4,7 @@ licenselink = "https://github.com/AlecGhost/spin/blob/main/LICENSE"
 description = "A minimalist, dark-themed Hugo module with dynamic collection discovery, instant search, and clean typography."
 homepage = "https://github.com/AlecGhost/spin"
 tags = ["blog", "minimalist", "dark", "search", "collections"]
-features = ["dark-theme", "fuse-search", "dynamic-collections", "responsive"]
+features = ["dark-theme", "search", "dynamic-collections", "responsive"]
 min_hugo_version = "0.120.0"
 
 [author]
