@@ -4,7 +4,7 @@
 
 ## Features
 
-- **Minimalist Dark Aesthetic**: Sharp typography, slate/charcoal tones, flat contrast, **strictly no gradients**.
+- **Catppuccin Mocha Aesthetic**: Sharp typography styled with the official [Catppuccin Mocha](https://github.com/catppuccin/catppuccin) palette, flat contrast.
 - **Dynamic Collections**: Automatically detects and renders navigation, cards, filter tabs, and breadcrumbs from any folder under `content/` without hardcoded menus.
 - **Standalone Notes Category**: Mark general notes to appear in the overview and global search without creating a collection card or tab.
 - **Instant Full-Text & Multi-Field Search**: Client-side fuzzy and keyword search with collection filtering tabs and match snippet highlighting.

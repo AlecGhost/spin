@@ -3,7 +3,7 @@
   <header class="article-header">
     <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem;">
       <span class="collection-badge">{{ .Title }}</span>
-      <span style="font-size: 0.85rem; color: var(--text-muted);">{{ len .RegularPages }} {{ if eq (len .RegularPages) 1 }}entry{{ else }}entries{{ end }}</span>
+      <span style="font-size: 0.85rem; color: var(--text-secondary);">{{ len .RegularPages }} {{ if eq (len .RegularPages) 1 }}entry{{ else }}entries{{ end }}</span>
     </div>
     <h1 class="article-title">{{ .Title }}</h1>
     {{ with .Description }}

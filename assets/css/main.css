@@ -1,27 +1,27 @@
 /* ==========================================================================
-   MINIMALIST DARK THEME - NO GRADIENTS
+   CATPPUCCIN MOCHA THEME
    ========================================================================== */
 
 :root {
-  --bg: #0f1115;
-  --bg-subtle: #16181d;
-  --surface: #1a1d24;
-  --surface-hover: #222630;
-  --surface-active: #2a2f3c;
-  --border: #282c37;
-  --border-hover: #3d4353;
-  --border-accent: #58a6ff;
+  --bg: #1e1e2e;
+  --bg-subtle: #181825;
+  --surface: #313244;
+  --surface-hover: #45475a;
+  --surface-active: #585b70;
+  --border: #45475a;
+  --border-hover: #585b70;
+  --border-accent: #89b4fa;
 
-  --text-main: #e6edf3;
-  --text-secondary: #9da7b3;
-  --text-muted: #656d79;
+  --text-main: #cdd6f4;
+  --text-secondary: #a6adc8;
+  --text-muted: #6c7086;
   
-  --accent: #58a6ff;
-  --accent-tech: #7ee787;
-  --accent-dnd: #f0883e;
+  --accent: #89b4fa;
+  --accent-tech: #a6e3a1;
+  --accent-dnd: #fab387;
   --accent-tag: #cba6f7;
   
-  --code-bg: #181926;
+  --code-bg: #181825;
   --code-border: #313244;
   
   --font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -126,7 +126,7 @@ img {
 }
 
 .brand-divider {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-weight: 400;
   margin: 0 0.15rem;
 }
@@ -239,7 +239,7 @@ img {
   border: 1px solid var(--border);
   padding: 0.1rem 0.35rem;
   border-radius: 3px;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .site-main {
@@ -255,7 +255,7 @@ img {
   padding: 2rem 1.5rem;
   padding-bottom: max(2rem, env(safe-area-inset-bottom, 0px));
   text-align: center;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 0.85rem;
   background-color: var(--bg-subtle);
 }
@@ -331,7 +331,7 @@ img {
   font-family: var(--font-mono);
   background: var(--bg);
   border: 1px solid var(--border);
-  color: var(--text-muted);
+  color: var(--text-secondary);
   padding: 0.15rem 0.5rem;
   border-radius: 12px;
   flex-shrink: 0;
@@ -412,7 +412,7 @@ img {
   gap: 0.5rem;
   margin-bottom: 0.6rem;
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .recent-post-date {
@@ -447,7 +447,7 @@ img {
   padding-top: 0.5rem;
   border-top: 1px solid var(--border);
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   display: flex;
   justify-content: flex-end;
 }
@@ -482,7 +482,7 @@ img {
   align-items: center;
   gap: 0.75rem;
   font-size: 0.8rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   margin-bottom: 0.4rem;
   flex-wrap: wrap;
 }
@@ -503,12 +503,12 @@ img {
 
 .badge-tech {
   color: var(--accent-tech);
-  border-color: rgba(126, 231, 135, 0.2);
+  border-color: rgba(166, 227, 161, 0.2);
 }
 
 .badge-dnd {
   color: var(--accent-dnd);
-  border-color: rgba(240, 136, 62, 0.2);
+  border-color: rgba(250, 179, 135, 0.2);
 }
 
 .post-item-title {
@@ -552,7 +552,7 @@ img {
   align-items: center;
   gap: 1rem;
   font-size: 0.85rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
 }
 
 .article-content {
@@ -703,7 +703,7 @@ img {
 }
 
 .search-icon {
-  color: var(--text-muted);
+  color: var(--text-secondary);
   width: 18px;
   height: 18px;
   flex-shrink: 0;
@@ -757,7 +757,7 @@ img {
 .desktop-esc-hint {
   font-family: var(--font-mono);
   font-size: 0.72rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   display: inline-block;
 }
 
@@ -862,8 +862,8 @@ img {
 }
 
 mark.search-highlight {
-  background: rgba(88, 166, 255, 0.25);
-  color: #79c0ff;
+  background: rgba(137, 180, 250, 0.25);
+  color: #89dceb;
   padding: 0.05rem 0.2rem;
   border-radius: 2px;
   font-weight: 600;
@@ -872,7 +872,7 @@ mark.search-highlight {
 .search-empty {
   padding: 2.5rem 1rem;
   text-align: center;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   font-size: 0.9rem;
 }
 
@@ -880,7 +880,7 @@ mark.search-highlight {
   padding: 0.6rem 1.25rem;
   border-top: 1px solid var(--border);
   font-size: 0.75rem;
-  color: var(--text-muted);
+  color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: space-between;
