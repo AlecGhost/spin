@@ -6,7 +6,7 @@
         <a href="{{ . }}" target="_blank" rel="noopener noreferrer">{{ site.Params.author | default site.Title }}</a>
       {{- else }}
         {{ site.Params.author | default site.Title }}
-      {{- end }}.
+      {{- end }}
       {{ with site.Copyright }}{{ . }}{{ else }}{{ end }}
     </p>
   </div>
