@@ -767,6 +767,7 @@ img {
 
 .search-filter-bar {
   display: flex;
+  align-items: center;
   gap: 0.5rem;
   padding: 0.6rem 1.25rem;
   background: var(--surface);
@@ -782,6 +783,10 @@ img {
 }
 
 .filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1.2;
   background: var(--bg-subtle);
   border: 1px solid var(--border);
   color: var(--text-secondary);
@@ -794,6 +799,8 @@ img {
   flex-shrink: 0;
   user-select: none;
   touch-action: manipulation;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
 .filter-btn:hover {

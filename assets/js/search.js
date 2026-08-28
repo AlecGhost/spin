@@ -49,10 +49,10 @@
   function renderFilterBars() {
     // Populate Modal Filter Bar
     if (modalFilterBar) {
-      let html = `<button class="filter-btn ${currentCollection === 'all' ? 'active' : ''}" data-collection="all">All</button>`;
+      let html = `<button type="button" class="filter-btn ${currentCollection === 'all' ? 'active' : ''}" data-collection="all">All</button>`;
       for (const [slug, title] of collectionsMap.entries()) {
         const active = currentCollection === slug ? 'active' : '';
-        html += `<button class="filter-btn ${active}" data-collection="${escapeHtml(slug)}">${escapeHtml(title)}</button>`;
+        html += `<button type="button" class="filter-btn ${active}" data-collection="${escapeHtml(slug)}">${escapeHtml(title)}</button>`;
       }
       modalFilterBar.innerHTML = html;
       modalFilterBar.querySelectorAll('.filter-btn').forEach((btn) => {
@@ -67,10 +67,10 @@
 
     // Populate Standalone Search Page Filter Bar
     if (pageFilterBar) {
-      let html = `<button class="filter-btn ${currentCollection === 'all' ? 'active' : ''}" data-collection="all">All Collections</button>`;
+      let html = `<button type="button" class="filter-btn ${currentCollection === 'all' ? 'active' : ''}" data-collection="all">All Collections</button>`;
       for (const [slug, title] of collectionsMap.entries()) {
         const active = currentCollection === slug ? 'active' : '';
-        html += `<button class="filter-btn ${active}" data-collection="${escapeHtml(slug)}">${escapeHtml(title)}</button>`;
+        html += `<button type="button" class="filter-btn ${active}" data-collection="${escapeHtml(slug)}">${escapeHtml(title)}</button>`;
       }
       pageFilterBar.innerHTML = html;
       pageFilterBar.querySelectorAll('.filter-btn').forEach((btn) => {
