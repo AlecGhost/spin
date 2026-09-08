@@ -7,11 +7,11 @@
 
     filterContainers.forEach((container) => {
       // Find the associated posts-list (sibling or within the same main/page wrapper)
+      // Find all post items within the same page wrapper
       const pageWrapper = container.closest('.list-page, .overview-page, .site-main') || document.body;
-      const postsList = pageWrapper.querySelector('.posts-list');
-      if (!postsList) return;
+      const postItems = Array.from(pageWrapper.querySelectorAll('.post-item'));
+      if (!postItems.length) return;
 
-      const postItems = Array.from(postsList.querySelectorAll('.post-item'));
       const chips = Array.from(container.querySelectorAll('.tag-chip'));
       const clearBtn = container.querySelector('.tag-filter-clear');
       const emptyMsg = container.querySelector('.tag-filter-empty');

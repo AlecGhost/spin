@@ -5,8 +5,8 @@
 <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ site.Params.description }}{{ end }}">
 <meta name="search-index" content="{{ "index.json" | relURL }}">
 
-{{ $main := resources.Get "css/main.css" }}
-{{ with $main }}<link rel="stylesheet" href="{{ .RelPermalink }}">{{ end }}
+{{ $main := resources.Get "css/main.css" | minify }}
+{{ with $main }}<style>{{ .Content | safeCSS }}</style>{{ end }}
 
 {{ partial "head-extra.html" . }}
 
