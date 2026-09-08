@@ -526,6 +526,128 @@ img {
 }
 
 /* ==========================================================================
+   TAG FILTER CHIPS
+   ========================================================================== */
+
+.tag-filter-container {
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.tag-filter-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.tag-filter-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.tag-filter-clear {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--accent);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: none;
+  transition: color var(--transition);
+  font-family: inherit;
+}
+
+.tag-filter-clear:hover {
+  text-decoration: underline;
+  color: var(--text-main);
+}
+
+.tag-chips-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+}
+
+.tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  color: var(--text-secondary);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all var(--transition);
+  user-select: none;
+  line-height: 1.3;
+  touch-action: manipulation;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.tag-chip:hover {
+  background: var(--surface-hover);
+  border-color: var(--border-hover);
+  color: var(--text-main);
+}
+
+.tag-chip:active {
+  background: var(--surface-active);
+}
+
+.tag-chip.active {
+  background: rgba(203, 166, 247, 0.15);
+  border-color: var(--accent-tag);
+  color: var(--accent-tag);
+  font-weight: 600;
+  box-shadow: 0 0 0 1px var(--accent-tag);
+}
+
+.tag-chip-hash {
+  color: var(--text-muted);
+  transition: color var(--transition);
+}
+
+.tag-chip.active .tag-chip-hash {
+  color: var(--accent-tag);
+}
+
+.tag-filter-empty {
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-md);
+  display: none;
+  margin-top: 0.5rem;
+}
+
+.post-item-tags {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.post-tag {
+  color: var(--accent-tag);
+  font-size: 0.8rem;
+}
+
+/* ==========================================================================
    ARTICLE / SINGLE PAGE PROSE
    ========================================================================== */
 
@@ -1022,6 +1144,15 @@ mark.search-highlight {
   .post-item-meta {
     flex-wrap: wrap;
     gap: 0.4rem 0.6rem;
+    font-size: 0.78rem;
+  }
+
+  .tag-filter-container {
+    margin-bottom: 1.25rem;
+  }
+
+  .tag-chip {
+    padding: 0.3rem 0.6rem;
     font-size: 0.78rem;
   }
 

@@ -1,0 +1,32 @@
+{{ $pages := .pages }}
+{{ $tags := slice }}
+{{ range $pages }}
+  {{ with .Params.tags }}
+    {{ range . }}
+      {{ $t := . | lower }}
+      {{ if ne $t "" }}
+        {{ $tags = $tags | append $t }}
+      {{ end }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+{{ $tags = $tags | uniq | sort }}
+
+{{ if gt (len $tags) 0 }}
+<div class="tag-filter-container" aria-label="Filter entries by tag">
+  <div class="tag-filter-header">
+    <span class="tag-filter-label">Filter by tag</span>
+    <button type="button" class="tag-filter-clear" aria-label="Clear active tag filters">Clear all</button>
+  </div>
+  <div class="tag-chips-list" role="group" aria-label="Tag filter options">
+    {{ range $tags }}
+      <button type="button" class="tag-chip" data-tag="{{ . }}" aria-pressed="false">
+        <span class="tag-chip-hash">#</span>{{ . }}
+      </button>
+    {{ end }}
+  </div>
+  <div class="tag-filter-empty" role="status" aria-live="polite">
+    No entries found matching the selected tags.
+  </div>
+</div>
+{{ end }}
