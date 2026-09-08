@@ -13,6 +13,7 @@
 
   <div class="posts-list">
     {{ range site.RegularPages.ByDate.Reverse }}
+    {{ $itemTitle := partial "page-title.html" . }}
     {{- $postTags := slice -}}
     {{- with .Params.tags -}}
       {{- range . -}}
@@ -23,10 +24,13 @@
     <a href="{{ .RelPermalink }}" class="post-item" data-tags='{{ $postTags | jsonify }}'>
       <div class="post-item-meta">
         {{ if and .Section (ne .Section $standalone) (ne .Section "search") (ne .Section "overview") }}
-          <span class="collection-badge">{{ with site.GetPage (printf "/%s" .Section) }}{{ .Title }}{{ else }}{{ .Section }}{{ end }}</span>
+          {{ $secPage := site.GetPage (printf "/%s" .Section) }}
+          <span class="collection-badge">{{ with $secPage }}{{ .Title | default (.Section | humanize) }}{{ else }}{{ .Section | humanize }}{{ end }}</span>
         {{ end }}
-        <span>{{ .Date.Format "Jan 02, 2006" }}</span>
-        <span>&middot;</span>
+        {{ if not .Date.IsZero }}
+          <span>{{ .Date.Format "Jan 02, 2006" }}</span>
+          <span>&middot;</span>
+        {{ end }}
         <span>{{ .ReadingTime }} min read</span>
         {{ with .Params.tags }}
           <span>&middot;</span>
@@ -37,7 +41,7 @@
           </span>
         {{ end }}
       </div>
-      <h3 class="post-item-title">{{ .Title }}</h3>
+      <h3 class="post-item-title">{{ $itemTitle }}</h3>
       <p class="post-item-summary">
         {{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify | truncate 160 }}{{ end }}
       </p>

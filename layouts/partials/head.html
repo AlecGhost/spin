@@ -1,10 +1,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ .Title }} | {{ site.Title }}{{ end }}</title>
+{{- $pageTitle := partial "page-title.html" . -}}
+<title>{{ if .IsHome }}{{ site.Title }}{{ else }}{{ $pageTitle }} | {{ site.Title }}{{ end }}</title>
 <meta name="description" content="{{ with .Description }}{{ . }}{{ else }}{{ site.Params.description }}{{ end }}">
 <meta name="search-index" content="{{ "index.json" | relURL }}">
 
 {{ $main := resources.Get "css/main.css" }}
 {{ with $main }}<link rel="stylesheet" href="{{ .RelPermalink }}">{{ end }}
+
+{{ partial "head-extra.html" . }}
 
 

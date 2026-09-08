@@ -6,18 +6,19 @@
   </section>
 
   {{ $standalone := site.Params.standaloneSection | default "notes" }}
-  {{ $collections := where site.Sections "Section" "not in" (slice "search" "overview" $standalone) }}
+  {{ $collections := where site.Sections.ByWeight "Section" "not in" (slice "search" "overview" $standalone) }}
 
   {{ if gt (len $collections) 0 }}
   <div class="collections-grid">
     {{ range $collections }}
+    {{ $collTitle := .Title | default (.Section | humanize) }}
     <a href="{{ .RelPermalink }}" class="collection-card">
       <div class="collection-card-header">
-        <span class="collection-title">{{ .Title }}</span>
+        <span class="collection-title">{{ $collTitle }}</span>
         <span class="collection-count">{{ len .RegularPages }} {{ if eq (len .RegularPages) 1 }}article{{ else }}articles{{ end }}</span>
       </div>
-      <p class="collection-desc">{{ with .Description }}{{ . }}{{ else }}Articles and notes in {{ .Title }}.{{ end }}</p>
-      <span class="collection-link-text">Browse {{ .Title }} &rarr;</span>
+      <p class="collection-desc">{{ with .Description }}{{ . }}{{ else }}Articles and notes in {{ $collTitle }}.{{ end }}</p>
+      <span class="collection-link-text">Browse {{ $collTitle }} &rarr;</span>
     </a>
     {{ end }}
   </div>
@@ -31,14 +32,18 @@
 
     <div class="recent-posts-grid">
       {{ range first 6 site.RegularPages.ByDate.Reverse }}
+      {{ $itemTitle := partial "page-title.html" . }}
       <a href="{{ .RelPermalink }}" class="recent-post-card">
         <div class="recent-post-meta">
           {{ if and .Section (ne .Section $standalone) (ne .Section "search") (ne .Section "overview") }}
-            <span class="collection-badge">{{ with site.GetPage (printf "/%s" .Section) }}{{ .Title }}{{ else }}{{ .Section }}{{ end }}</span>
+            {{ $secPage := site.GetPage (printf "/%s" .Section) }}
+            <span class="collection-badge">{{ with $secPage }}{{ .Title | default (.Section | humanize) }}{{ else }}{{ .Section | humanize }}{{ end }}</span>
           {{ end }}
-          <span class="recent-post-date">{{ .Date.Format "Jan 02" }}</span>
+          {{ if not .Date.IsZero }}
+            <span class="recent-post-date">{{ .Date.Format "Jan 02" }}</span>
+          {{ end }}
         </div>
-        <h3 class="recent-post-title">{{ .Title }}</h3>
+        <h3 class="recent-post-title">{{ $itemTitle }}</h3>
         <p class="recent-post-summary">
           {{ with .Description }}{{ . }}{{ else }}{{ .Summary | plainify | truncate 100 }}{{ end }}
         </p>

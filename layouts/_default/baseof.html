@@ -17,5 +17,6 @@
   {{ with $search }}<script src="{{ .RelPermalink }}"></script>{{ end }}
   {{ $tags := resources.Get "js/tags.js" }}
   {{ with $tags }}<script src="{{ .RelPermalink }}"></script>{{ end }}
+  {{ partial "footer-extra.html" . }}
 </body>
 </html>

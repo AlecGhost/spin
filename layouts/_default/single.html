@@ -1,15 +1,19 @@
 {{ define "main" }}
 {{ $standalone := site.Params.standaloneSection | default "notes" }}
+{{ $pageTitle := partial "page-title.html" . }}
 <article class="single-article">
   <header class="article-header">
     <div class="article-meta" style="margin-bottom: 0.75rem;">
       {{ if and .Section (ne .Section $standalone) (ne .Section "search") }}
-        <a href="{{ with site.GetPage (printf "/%s" .Section) }}{{ .RelPermalink }}{{ else }}{{ (printf "%s/" .Section) | relURL }}{{ end }}" class="collection-badge">
-          &larr; {{ with site.GetPage (printf "/%s" .Section) }}{{ .Title }}{{ else }}{{ $.Section }}{{ end }}
+        {{ $secPage := site.GetPage (printf "/%s" .Section) }}
+        <a href="{{ with $secPage }}{{ .RelPermalink }}{{ else }}{{ (printf "%s/" .Section) | relURL }}{{ end }}" class="collection-badge">
+          &larr; {{ with $secPage }}{{ .Title | default (.Section | humanize) }}{{ else }}{{ $.Section | humanize }}{{ end }}
         </a>
       {{ end }}
-      <span>{{ .Date.Format "January 02, 2006" }}</span>
-      <span>&middot;</span>
+      {{ if not .Date.IsZero }}
+        <span>{{ .Date.Format "January 02, 2006" }}</span>
+        <span>&middot;</span>
+      {{ end }}
       <span>{{ .ReadingTime }} min read</span>
       {{ with .Params.tags }}
         <span>&middot;</span>
@@ -21,14 +25,14 @@
       {{ end }}
     </div>
 
-    <h1 class="article-title">{{ .Title }}</h1>
+    <h1 class="article-title">{{ $pageTitle }}</h1>
     {{ with .Description }}
       <p style="color: var(--text-secondary); font-size: 1.1rem;">{{ . }}</p>
     {{ end }}
   </header>
 
   <div class="article-content">
-    {{ .Content }}
+    {{ .Content | replaceRE `(?s)^\s*<h1\b[^>]*>.*?</h1>\s*` "" | safeHTML }}
   </div>
 </article>
 {{ end }}

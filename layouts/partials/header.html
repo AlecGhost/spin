@@ -15,7 +15,7 @@
         <a href="{{ "overview/" | relURL }}" class="nav-link {{ if eq .Section "overview" }}active{{ end }}">{{ site.Params.overviewNavLabel | default "Overview" }}</a>
         
         {{ $standalone := site.Params.standaloneSection | default "notes" }}
-        {{ range where site.Sections "Section" "not in" (slice "search" "overview" $standalone) }}
+        {{ range where site.Sections.ByWeight "Section" "not in" (slice "search" "overview" $standalone) }}
           <a href="{{ .RelPermalink }}" class="nav-link {{ if eq $.Section .Section }}active{{ end }}">{{ .Title }}</a>
         {{ end }}
       </div>

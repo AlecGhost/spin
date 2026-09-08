@@ -1,0 +1,14 @@
+{{ $pageTitle := .Title }}
+{{ if not $pageTitle }}
+  {{ $matches := findRESubmatch `(?m)^#\s+(.+)$` .RawContent 1 }}
+  {{ if gt (len $matches) 0 }}
+    {{ $pageTitle = index (index $matches 0) 1 }}
+  {{ else }}
+    {{ with .File }}
+      {{ $pageTitle = .TranslationBaseName | humanize }}
+    {{ else }}
+      {{ $pageTitle = .LinkTitle }}
+    {{ end }}
+  {{ end }}
+{{ end }}
+{{ return $pageTitle }}
