@@ -11,6 +11,8 @@
 
   {{ partial "tag-filter.html" (dict "pages" site.RegularPages) }}
 
+  {{ partial "knowledge-graph.html" (dict "pages" site.RegularPages) }}
+
   <div class="posts-list">
     {{ range site.RegularPages.ByDate.Reverse }}
     {{ $itemTitle := partial "page-title.html" . }}

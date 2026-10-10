@@ -73,6 +73,13 @@
 
         // Sync URL query params
         syncUrlParams();
+
+        // Notify listeners (e.g. knowledge graph)
+        window.dispatchEvent(
+          new CustomEvent('spin:tags-change', {
+            detail: { activeTags: Array.from(activeTags) }
+          })
+        );
       }
 
       function syncUrlParams() {

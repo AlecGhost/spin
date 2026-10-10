@@ -12,6 +12,6 @@ This logbook serves as a personal repository for engineering explorations, compi
 ### Architecture Highlights
 
 - **Static Generation**: Built with Hugo for high compilation speed.
-- **Clean Typography**: Refined dark theme styling for notes and code blocks.
+- **Clean Typography**: Refined dark theme styling for notes and [syntax-highlighted code blocks](/tech/lighter-syntax-highlighter/).
 - **Dynamic Collections**: Content directories (like `content/tech` and `content/dnd`) are discovered dynamically without hardcoded menus or layouts.
 - **Standalone Notes**: This article belongs to the special standalone category. It appears in the overview stream and global full-text search, but is independent of any specific project collection.
