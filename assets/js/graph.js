@@ -25,7 +25,7 @@
   const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
   const MIN_ALPHA = 0.005;
   const DRAG_THRESHOLD_PX = 4;
-  const MIN_SCALE = 0.2;
+  const MIN_SCALE = 0.1;
   const MAX_SCALE = 4.0;
 
   function parseGraphPayload(scriptEl) {
@@ -71,12 +71,14 @@
         const tags = Array.isArray(n.tags)
           ? n.tags.map((t) => String(t).toLowerCase().trim()).filter(Boolean)
           : [];
+        const title = String(n.title || id);
         const angle = index * GOLDEN_ANGLE;
-        const radiusDist = 22 * Math.sqrt(index + 1);
+        const radiusDist = 115 * Math.sqrt(index);
+        const labelWidth = Math.max(64, Math.min(240, title.length * 6.8 + 20));
 
         const node = {
           id,
-          title: String(n.title || id),
+          title,
           url: String(n.url || id),
           collection,
           collectionTitle,
@@ -90,6 +92,7 @@
           fy: null,
           degree: 0,
           radius: 4.5,
+          labelWidth,
           visible: true
         };
         nodeById.set(id, node);
@@ -149,6 +152,10 @@
       map.get(edge.target.id).add(edge.source.id);
     }
     return map;
+  }
+
+  function boxesOverlap(a, b) {
+    return a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
   }
 
   function escapeHtml(str) {
@@ -235,6 +242,11 @@
       }
 
       renderLegend();
+      state.alpha = 1;
+      for (let i = 0; i < 45; i += 1) {
+        stepPhysics();
+        state.alpha *= 0.985;
+      }
       reheatSimulation(0.5);
     }
 
@@ -265,15 +277,62 @@
       legendEl.style.display = html ? 'flex' : 'none';
     }
 
+    function resolveCollisions(visible, count) {
+      for (let pass = 0; pass < 2; pass += 1) {
+        for (let i = 0; i < count; i += 1) {
+          const a = visible[i];
+          for (let j = i + 1; j < count; j += 1) {
+            const b = visible[j];
+            const minDx = (a.labelWidth + b.labelWidth) * 0.5 + 22;
+            const minDy = a.radius + b.radius + 32;
+
+            let dx = b.x - a.x;
+            let dy = b.y - a.y;
+            if (Math.abs(dx) >= minDx || Math.abs(dy) >= minDy) continue;
+
+            if (dx === 0 && dy === 0) {
+              dx = (i % 2 === 0 ? 1 : -1) * 0.5;
+              dy = (j % 2 === 0 ? 1 : -1) * 0.5;
+            }
+
+            const nx = dx / minDx;
+            const ny = dy / minDy;
+            const normDistSq = nx * nx + ny * ny;
+            if (normDistSq >= 1) continue;
+
+            const normDist = Math.sqrt(normDistSq) || 0.001;
+            const overlap = (1 - normDist) * 0.75;
+            const pushX = (nx / normDist) * overlap * minDx;
+            const pushY = (ny / normDist) * overlap * minDy;
+
+            const aPinned = a.fx !== null && a.fy !== null;
+            const bPinned = b.fx !== null && b.fy !== null;
+
+            if (aPinned && !bPinned) {
+              b.x += pushX;
+              b.y += pushY;
+            } else if (!aPinned && bPinned) {
+              a.x -= pushX;
+              a.y -= pushY;
+            } else if (!aPinned && !bPinned) {
+              a.x -= pushX * 0.5;
+              a.y -= pushY * 0.5;
+              b.x += pushX * 0.5;
+              b.y += pushY * 0.5;
+            }
+          }
+        }
+      }
+    }
+
     function stepPhysics() {
       const visible = state.visibleNodes;
       const count = visible.length;
       if (count === 0) return;
 
       const alpha = state.alpha;
-      const repulsionStrength = count > 80 ? 260 : 340;
-      const gravityStrength = 0.022;
-      const springStrength = 0.045;
+      const repulsionStrength = 9000;
+      const springStrength = 0.024;
 
       // 1. Repulsion between visible node pairs
       for (let i = 0; i < count; i += 1) {
@@ -286,7 +345,7 @@
             dx = (i % 2 === 0 ? 1 : -1) * 0.5;
             dy = (j % 2 === 0 ? 1 : -1) * 0.5;
           }
-          const distSq = Math.max(80, dx * dx + dy * dy);
+          const distSq = Math.max(400, dx * dx + dy * dy);
           const dist = Math.sqrt(distSq);
           const force = (repulsionStrength * alpha) / distSq;
           const fx = (dx / dist) * force;
@@ -306,7 +365,8 @@
         const dx = v.x - u.x;
         const dy = v.y - u.y;
         const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const restLength = 52 + (u.radius + v.radius) * 2.2;
+        const restLength =
+          160 + (u.radius + v.radius) * 3 + Math.min(90, (u.degree + v.degree) * 3.5);
         const displacement = dist - restLength;
         const force = displacement * springStrength * alpha;
         const fx = (dx / dist) * force;
@@ -329,15 +389,19 @@
           continue;
         }
 
+        const gravityStrength = node.degree === 0 ? 0.0032 : 0.0016;
         node.vx -= node.x * gravityStrength * alpha;
         node.vy -= node.y * gravityStrength * alpha;
 
-        node.vx *= 0.6;
-        node.vy *= 0.6;
+        node.vx *= 0.62;
+        node.vy *= 0.62;
 
         node.x += node.vx;
         node.y += node.vy;
       }
+
+      // 4. Elliptical node + label collision separation
+      resolveCollisions(visible, count);
     }
 
     function isNeighbourOfHovered(node) {
@@ -389,7 +453,8 @@
         ctx.stroke();
       }
 
-      // Draw nodes
+      // Draw nodes and record circle bounding boxes so labels never overlap nodes
+      const occupiedBoxes = [];
       for (const node of state.visibleNodes) {
         const isFocus = !hoveredNode || isNeighbourOfHovered(node);
         ctx.globalAlpha = isFocus ? 1 : THEME.dimAlpha;
@@ -403,39 +468,82 @@
         ctx.strokeStyle =
           hoveredNode && node.id === hoveredNode.id ? THEME.hoverRing : THEME.nodeBorder;
         ctx.stroke();
+
+        const rPad = node.radius + 2 / scale;
+        occupiedBoxes.push({
+          left: node.x - rPad,
+          right: node.x + rPad,
+          top: node.y - rPad,
+          bottom: node.y + rPad
+        });
       }
 
-      // Draw labels
-      const showAllLabels = state.visibleNodes.length <= 24 || scale >= 1.35;
-      const fontSize = Math.max(9, Math.min(13, 11 / Math.pow(scale, 0.35)));
+      // Draw labels with priority ordering and strict bounding-box collision culling
+      const fontSize = Math.max(9, Math.min(13, 11 / Math.pow(scale, 0.25)));
       ctx.font = `500 ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
 
-      for (const node of state.visibleNodes) {
+      const labelCandidates = state.visibleNodes.slice().sort((a, b) => {
+        if (hoveredNode) {
+          if (a.id === hoveredNode.id) return -1;
+          if (b.id === hoveredNode.id) return 1;
+          const aN = isNeighbourOfHovered(a);
+          const bN = isNeighbourOfHovered(b);
+          if (aN !== bN) return aN ? -1 : 1;
+        }
+        if (b.degree !== a.degree) return b.degree - a.degree;
+        return a.title.localeCompare(b.title);
+      });
+
+      const padX = 4 / scale;
+      const padY = 2 / scale;
+
+      for (const node of labelCandidates) {
+        const isHoveredSelf = Boolean(hoveredNode && node.id === hoveredNode.id);
         let shouldShowLabel = false;
-        let labelAlpha = 0.85;
+        let labelAlpha = 0.88;
 
         if (hoveredNode) {
           if (isNeighbourOfHovered(node)) {
             shouldShowLabel = true;
-            labelAlpha = node.id === hoveredNode.id ? 1 : 0.92;
+            labelAlpha = isHoveredSelf ? 1 : 0.92;
           }
-        } else if (showAllLabels || node.degree >= 3 || (scale >= 0.95 && node.degree >= 1)) {
+        } else if (scale >= 0.35) {
           shouldShowLabel = true;
-          labelAlpha = Math.min(0.9, Math.max(0.55, (scale - 0.5) * 0.8));
+          labelAlpha = Math.min(0.92, Math.max(0.6, (scale - 0.25) * 0.9));
         }
 
         if (!shouldShowLabel) continue;
 
         const labelY = node.y + node.radius + 4 / scale;
+        const measuredWidth = ctx.measureText(node.title).width;
+        const labelBox = {
+          left: node.x - measuredWidth / 2 - padX,
+          right: node.x + measuredWidth / 2 + padX,
+          top: labelY - padY,
+          bottom: labelY + fontSize + padY
+        };
+
+        if (!isHoveredSelf) {
+          let collides = false;
+          for (let i = 0; i < occupiedBoxes.length; i += 1) {
+            if (boxesOverlap(labelBox, occupiedBoxes[i])) {
+              collides = true;
+              break;
+            }
+          }
+          if (collides) continue;
+        }
+
+        occupiedBoxes.push(labelBox);
+
         ctx.globalAlpha = labelAlpha;
         ctx.lineWidth = 3 / scale;
         ctx.strokeStyle = 'rgba(24, 24, 37, 0.85)';
         ctx.strokeText(node.title, node.x, labelY);
 
-        ctx.fillStyle =
-          hoveredNode && node.id === hoveredNode.id ? THEME.textMain : THEME.textSecondary;
+        ctx.fillStyle = isHoveredSelf ? THEME.textMain : THEME.textSecondary;
         ctx.fillText(node.title, node.x, labelY);
       }
 
