@@ -26,6 +26,9 @@
   const DRAG_THRESHOLD_PX = 4;
   const MIN_SCALE = 0.1;
   const MAX_SCALE = 4.0;
+  const MIN_NODE_RADIUS = 4;
+  const MAX_NODE_RADIUS = 16;
+  const MAX_RADIUS_DEGREE = 100;
 
   function parseGraphPayload(scriptEl) {
     if (!scriptEl || !scriptEl.textContent) {
@@ -88,7 +91,7 @@
           vy: 0,
           degree: 0,
           mass: 1,
-          radius: 4.5,
+          radius: MIN_NODE_RADIUS,
           visible: true
         };
         nodeById.set(id, node);
@@ -136,7 +139,8 @@
   }
 
   function computeNodeRadius(degree) {
-    return 4.5 + Math.min(8, Math.sqrt(degree) * 2.2);
+    const fraction = Math.min(1, Math.max(0, degree / MAX_RADIUS_DEGREE));
+    return MIN_NODE_RADIUS + fraction * (MAX_NODE_RADIUS - MIN_NODE_RADIUS);
   }
 
   function buildAdjacencyMap(activeEdges) {
@@ -519,8 +523,9 @@
 
         if (!shouldShowLabel) continue;
 
+        const labelText = isHoveredSelf && node.degree > 0 ? `${node.title} (${node.degree})` : node.title;
         const labelY = node.y + node.radius + 4 / scale;
-        const measuredWidth = ctx.measureText(node.title).width;
+        const measuredWidth = ctx.measureText(labelText).width;
         const labelBox = {
           left: node.x - measuredWidth / 2 - padX,
           right: node.x + measuredWidth / 2 + padX,
@@ -544,10 +549,10 @@
         ctx.globalAlpha = labelAlpha;
         ctx.lineWidth = 3 / scale;
         ctx.strokeStyle = 'rgba(24, 24, 37, 0.85)';
-        ctx.strokeText(node.title, node.x, labelY);
+        ctx.strokeText(labelText, node.x, labelY);
 
         ctx.fillStyle = isHoveredSelf ? THEME.textMain : THEME.textSecondary;
-        ctx.fillText(node.title, node.x, labelY);
+        ctx.fillText(labelText, node.x, labelY);
       }
 
       ctx.restore();
