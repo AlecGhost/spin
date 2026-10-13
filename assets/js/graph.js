@@ -23,7 +23,6 @@
   };
 
   const GOLDEN_ANGLE = Math.PI * (3 - Math.sqrt(5));
-  const MIN_ALPHA = 0.005;
   const DRAG_THRESHOLD_PX = 4;
   const MIN_SCALE = 0.1;
   const MAX_SCALE = 4.0;
@@ -73,8 +72,7 @@
           : [];
         const title = String(n.title || id);
         const angle = index * GOLDEN_ANGLE;
-        const radiusDist = 115 * Math.sqrt(index);
-        const labelWidth = Math.max(64, Math.min(240, title.length * 6.8 + 20));
+        const radiusDist = 65 * Math.sqrt(index);
 
         const node = {
           id,
@@ -88,11 +86,9 @@
           y: Math.sin(angle) * radiusDist,
           vx: 0,
           vy: 0,
-          fx: null,
-          fy: null,
           degree: 0,
+          mass: 1,
           radius: 4.5,
-          labelWidth,
           visible: true
         };
         nodeById.set(id, node);
@@ -183,6 +179,7 @@
     const { nodes, edges } = parsedResult.value;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    canvas.style.cursor = 'grab';
 
     const state = {
       width: 0,
@@ -191,13 +188,13 @@
       panX: 0,
       panY: 0,
       scale: 1,
-      alpha: 1,
+      alpha: 0,
       rafId: null,
       visibleNodes: [],
       activeEdges: [],
       adjacency: new Map(),
       hoveredNode: null,
-      draggedNode: null,
+      clickedNode: null,
       isPanning: false,
       pointerStartX: 0,
       pointerStartY: 0,
@@ -208,6 +205,16 @@
       pinchStartScale: 1,
       isFullscreen: false
     };
+
+    function computeStaticLayout(iterations) {
+      state.alpha = 1;
+      const decay = Math.pow(0.015, 1 / iterations);
+      for (let i = 0; i < iterations; i += 1) {
+        stepPhysics();
+        state.alpha *= decay;
+      }
+      state.alpha = 0;
+    }
 
     function updateFilterState(activeTags) {
       const tagSet = new Set(activeTags);
@@ -227,6 +234,7 @@
 
       for (const node of nodes) {
         node.radius = computeNodeRadius(node.degree);
+        node.mass = 1 + node.degree;
       }
 
       state.visibleNodes = nodes.filter((n) => n.visible);
@@ -242,12 +250,8 @@
       }
 
       renderLegend();
-      state.alpha = 1;
-      for (let i = 0; i < 45; i += 1) {
-        stepPhysics();
-        state.alpha *= 0.985;
-      }
-      reheatSimulation(0.5);
+      computeStaticLayout(180);
+      drawGraph();
     }
 
     function renderLegend() {
@@ -278,49 +282,35 @@
     }
 
     function resolveCollisions(visible, count) {
-      for (let pass = 0; pass < 2; pass += 1) {
-        for (let i = 0; i < count; i += 1) {
-          const a = visible[i];
-          for (let j = i + 1; j < count; j += 1) {
-            const b = visible[j];
-            const minDx = (a.labelWidth + b.labelWidth) * 0.5 + 22;
-            const minDy = a.radius + b.radius + 32;
+      for (let i = 0; i < count; i += 1) {
+        const a = visible[i];
+        for (let j = i + 1; j < count; j += 1) {
+          const b = visible[j];
+          const minDist = a.radius + b.radius + 54;
+          let dx = b.x - a.x;
+          let dy = b.y - a.y;
+          if (Math.abs(dx) >= minDist || Math.abs(dy) >= minDist) continue;
 
-            let dx = b.x - a.x;
-            let dy = b.y - a.y;
-            if (Math.abs(dx) >= minDx || Math.abs(dy) >= minDy) continue;
-
-            if (dx === 0 && dy === 0) {
-              dx = (i % 2 === 0 ? 1 : -1) * 0.5;
-              dy = (j % 2 === 0 ? 1 : -1) * 0.5;
-            }
-
-            const nx = dx / minDx;
-            const ny = dy / minDy;
-            const normDistSq = nx * nx + ny * ny;
-            if (normDistSq >= 1) continue;
-
-            const normDist = Math.sqrt(normDistSq) || 0.001;
-            const overlap = (1 - normDist) * 0.75;
-            const pushX = (nx / normDist) * overlap * minDx;
-            const pushY = (ny / normDist) * overlap * minDy;
-
-            const aPinned = a.fx !== null && a.fy !== null;
-            const bPinned = b.fx !== null && b.fy !== null;
-
-            if (aPinned && !bPinned) {
-              b.x += pushX;
-              b.y += pushY;
-            } else if (!aPinned && bPinned) {
-              a.x -= pushX;
-              a.y -= pushY;
-            } else if (!aPinned && !bPinned) {
-              a.x -= pushX * 0.5;
-              a.y -= pushY * 0.5;
-              b.x += pushX * 0.5;
-              b.y += pushY * 0.5;
-            }
+          if (dx === 0 && dy === 0) {
+            dx = (i % 2 === 0 ? 1 : -1) * 0.5;
+            dy = (j % 2 === 0 ? 1 : -1) * 0.5;
           }
+
+          const distSq = dx * dx + dy * dy;
+          if (distSq >= minDist * minDist) continue;
+
+          const dist = Math.sqrt(distSq) || 0.1;
+          const overlap = (minDist - dist) * 0.5;
+          const px = (dx / dist) * overlap;
+          const py = (dy / dist) * overlap;
+
+          const totalMass = a.mass + b.mass;
+          const aShare = b.mass / totalMass;
+          const bShare = a.mass / totalMass;
+          a.x -= px * aShare;
+          a.y -= py * aShare;
+          b.x += px * bShare;
+          b.y += py * bShare;
         }
       }
     }
@@ -331,10 +321,12 @@
       if (count === 0) return;
 
       const alpha = state.alpha;
-      const repulsionStrength = 9000;
-      const springStrength = 0.024;
+      const repulsionStrength = 42000;
+      const maxRepulsionDist = 520;
+      const maxRepulsionDistSq = maxRepulsionDist * maxRepulsionDist;
+      const springStrength = 0.28;
 
-      // 1. Repulsion between visible node pairs
+      // 1. Distance-limited repulsion weighted by node mass (Newton's 2nd law)
       for (let i = 0; i < count; i += 1) {
         const a = visible[i];
         for (let j = i + 1; j < count; j += 1) {
@@ -345,63 +337,72 @@
             dx = (i % 2 === 0 ? 1 : -1) * 0.5;
             dy = (j % 2 === 0 ? 1 : -1) * 0.5;
           }
-          const distSq = Math.max(400, dx * dx + dy * dy);
+          const rawDistSq = dx * dx + dy * dy;
+          if (rawDistSq >= maxRepulsionDistSq) continue;
+
+          const distSq = Math.max(400, rawDistSq);
           const dist = Math.sqrt(distSq);
-          const force = (repulsionStrength * alpha) / distSq;
+          const falloff = 1 - dist / maxRepulsionDist;
+          const force = (repulsionStrength * alpha * falloff) / distSq;
           const fx = (dx / dist) * force;
           const fy = (dy / dist) * force;
 
-          a.vx -= fx;
-          a.vy -= fy;
-          b.vx += fx;
-          b.vy += fy;
+          a.vx -= fx / a.mass;
+          a.vy -= fy / a.mass;
+          b.vx += fx / b.mass;
+          b.vy += fy / b.mass;
         }
       }
 
-      // 2. Spring attraction along active edges
+      // 2. Barycentric edge attraction (pulls every node toward the centroid of its neighbours)
       for (const edge of state.activeEdges) {
         const u = edge.source;
         const v = edge.target;
         const dx = v.x - u.x;
         const dy = v.y - u.y;
-        const dist = Math.sqrt(dx * dx + dy * dy) || 1;
-        const restLength =
-          160 + (u.radius + v.radius) * 3 + Math.min(90, (u.degree + v.degree) * 3.5);
-        const displacement = dist - restLength;
-        const force = displacement * springStrength * alpha;
-        const fx = (dx / dist) * force;
-        const fy = (dy / dist) * force;
+        const k = springStrength * alpha;
+        const fx = dx * k;
+        const fy = dy * k;
 
-        u.vx += fx;
-        u.vy += fy;
-        v.vx -= fx;
-        v.vy -= fy;
+        u.vx += fx / u.mass;
+        u.vy += fy / u.mass;
+        v.vx -= fx / v.mass;
+        v.vy -= fy / v.mass;
       }
 
-      // 3. Centring gravity and position integration
+      // 3. Gentle gravity, integration, and centre-of-mass stabilisation
+      let cx = 0;
+      let cy = 0;
+
       for (let i = 0; i < count; i += 1) {
         const node = visible[i];
-        if (node.fx !== null && node.fy !== null) {
-          node.x = node.fx;
-          node.y = node.fy;
-          node.vx = 0;
-          node.vy = 0;
-          continue;
-        }
-
-        const gravityStrength = node.degree === 0 ? 0.0032 : 0.0016;
+        const gravityStrength = node.degree === 0 ? 0.01 : 0.002;
         node.vx -= node.x * gravityStrength * alpha;
         node.vy -= node.y * gravityStrength * alpha;
 
-        node.vx *= 0.62;
-        node.vy *= 0.62;
+        node.vx *= 0.65;
+        node.vy *= 0.65;
 
         node.x += node.vx;
         node.y += node.vy;
+
+        cx += node.x;
+        cy += node.y;
       }
 
-      // 4. Elliptical node + label collision separation
-      resolveCollisions(visible, count);
+      if (count > 0) {
+        cx /= count;
+        cy /= count;
+        for (let i = 0; i < count; i += 1) {
+          visible[i].x -= cx;
+          visible[i].y -= cy;
+        }
+      }
+
+      // 4. Mass-weighted circular anti-overlap after initial topological crossing phase
+      if (alpha < 0.6) {
+        resolveCollisions(visible, count);
+      }
     }
 
     function isNeighbourOfHovered(node) {
@@ -453,7 +454,7 @@
         ctx.stroke();
       }
 
-      // Draw nodes and record circle bounding boxes so labels never overlap nodes
+      // Draw nodes and record circle bounding boxes for active/focused nodes
       const occupiedBoxes = [];
       for (const node of state.visibleNodes) {
         const isFocus = !hoveredNode || isNeighbourOfHovered(node);
@@ -469,13 +470,15 @@
           hoveredNode && node.id === hoveredNode.id ? THEME.hoverRing : THEME.nodeBorder;
         ctx.stroke();
 
-        const rPad = node.radius + 2 / scale;
-        occupiedBoxes.push({
-          left: node.x - rPad,
-          right: node.x + rPad,
-          top: node.y - rPad,
-          bottom: node.y + rPad
-        });
+        if (isFocus) {
+          const rPad = node.radius + 2 / scale;
+          occupiedBoxes.push({
+            left: node.x - rPad,
+            right: node.x + rPad,
+            top: node.y - rPad,
+            bottom: node.y + rPad
+          });
+        }
       }
 
       // Draw labels with priority ordering and strict bounding-box collision culling
@@ -550,29 +553,13 @@
       ctx.restore();
     }
 
-    function tick() {
-      state.rafId = null;
-      if (state.alpha > MIN_ALPHA || state.draggedNode) {
-        stepPhysics();
-        if (!state.draggedNode) {
-          state.alpha *= 0.982;
-        }
-      }
-      drawGraph();
-      if (state.alpha > MIN_ALPHA || state.draggedNode) {
-        state.rafId = window.requestAnimationFrame(tick);
-      }
-    }
-
     function requestRender() {
       if (state.rafId === null) {
-        state.rafId = window.requestAnimationFrame(tick);
+        state.rafId = window.requestAnimationFrame(() => {
+          state.rafId = null;
+          drawGraph();
+        });
       }
-    }
-
-    function reheatSimulation(targetAlpha) {
-      state.alpha = Math.max(state.alpha, targetAlpha);
-      requestRender();
     }
 
     function screenToWorld(clientX, clientY) {
@@ -635,54 +622,35 @@
         if (collapseIcon) collapseIcon.style.display = enabled ? '' : 'none';
       }
       resizeCanvas();
-      reheatSimulation(0.15);
     }
 
-    // Mouse Events
+    // Mouse Events: Pan, Zoom, Hover & Click-Navigation
     canvas.addEventListener('mousedown', (e) => {
       if (e.button !== 0) return;
       const world = screenToWorld(e.clientX, e.clientY);
-      const hit = findNodeAt(world.x, world.y);
+      state.clickedNode = findNodeAt(world.x, world.y);
 
       state.pointerStartX = e.clientX;
       state.pointerStartY = e.clientY;
       state.lastPointerX = e.clientX;
       state.lastPointerY = e.clientY;
       state.didDrag = false;
-
-      if (hit) {
-        state.draggedNode = hit;
-        hit.fx = hit.x;
-        hit.fy = hit.y;
-        canvas.style.cursor = 'grabbing';
-        reheatSimulation(0.35);
-      } else {
-        state.isPanning = true;
-        canvas.style.cursor = 'grabbing';
-      }
+      state.isPanning = true;
+      canvas.style.cursor = 'grabbing';
     });
 
     window.addEventListener('mousemove', (e) => {
-      if (state.draggedNode) {
-        const moveDist = Math.hypot(
-          e.clientX - state.pointerStartX,
-          e.clientY - state.pointerStartY
-        );
-        if (moveDist > DRAG_THRESHOLD_PX) state.didDrag = true;
-        const world = screenToWorld(e.clientX, e.clientY);
-        state.draggedNode.fx = world.x;
-        state.draggedNode.fy = world.y;
-        state.alpha = Math.max(state.alpha, 0.25);
-        requestRender();
-        return;
-      }
-
       if (state.isPanning) {
         const moveDist = Math.hypot(
           e.clientX - state.pointerStartX,
           e.clientY - state.pointerStartY
         );
-        if (moveDist > DRAG_THRESHOLD_PX) state.didDrag = true;
+        if (moveDist > DRAG_THRESHOLD_PX) {
+          state.didDrag = true;
+          if (state.hoveredNode) {
+            state.hoveredNode = null;
+          }
+        }
         state.panX += e.clientX - state.lastPointerX;
         state.panY += e.clientY - state.lastPointerY;
         state.lastPointerX = e.clientX;
@@ -703,28 +671,24 @@
     });
 
     window.addEventListener('mouseup', (e) => {
-      if (state.draggedNode) {
-        const clickedNode = state.draggedNode;
-        clickedNode.fx = null;
-        clickedNode.fy = null;
-        state.draggedNode = null;
-        canvas.style.cursor = state.hoveredNode ? 'pointer' : 'grab';
-
-        if (!state.didDrag && e.target === canvas && clickedNode.url) {
-          window.location.href = clickedNode.url;
-          return;
-        }
-        reheatSimulation(0.15);
-      } else if (state.isPanning) {
+      if (state.isPanning) {
         state.isPanning = false;
         canvas.style.cursor = state.hoveredNode ? 'pointer' : 'grab';
+
+        if (!state.didDrag && state.clickedNode && state.clickedNode.url) {
+          window.location.href = state.clickedNode.url;
+          return;
+        }
+        state.clickedNode = null;
       }
     });
 
     canvas.addEventListener('mouseleave', () => {
-      if (!state.draggedNode && state.hoveredNode) {
+      if (state.hoveredNode) {
         state.hoveredNode = null;
-        canvas.style.cursor = 'grab';
+        if (!state.isPanning) {
+          canvas.style.cursor = 'grab';
+        }
         requestRender();
       }
     });
@@ -739,34 +703,29 @@
       { passive: false }
     );
 
-    // Touch Events
+    // Touch Events: 1-finger Pan & Tap, 2-finger Pinch Zoom
     canvas.addEventListener(
       'touchstart',
       (e) => {
         if (e.touches.length === 1) {
           const touch = e.touches[0];
           const world = screenToWorld(touch.clientX, touch.clientY);
-          const hit = findNodeAt(world.x, world.y);
+          state.clickedNode = findNodeAt(world.x, world.y);
           state.pointerStartX = touch.clientX;
           state.pointerStartY = touch.clientY;
           state.lastPointerX = touch.clientX;
           state.lastPointerY = touch.clientY;
           state.didDrag = false;
+          state.isPanning = true;
 
-          if (hit) {
-            state.draggedNode = hit;
-            state.hoveredNode = hit;
-            hit.fx = hit.x;
-            hit.fy = hit.y;
-            reheatSimulation(0.35);
-          } else {
-            state.isPanning = true;
-            state.hoveredNode = null;
+          if (state.clickedNode) {
+            state.hoveredNode = state.clickedNode;
             requestRender();
           }
         } else if (e.touches.length === 2) {
-          state.draggedNode = null;
           state.isPanning = false;
+          state.clickedNode = null;
+          state.hoveredNode = null;
           const dx = e.touches[0].clientX - e.touches[1].clientX;
           const dy = e.touches[0].clientY - e.touches[1].clientY;
           state.pinchStartDist = Math.hypot(dx, dy);
@@ -779,26 +738,23 @@
     canvas.addEventListener(
       'touchmove',
       (e) => {
-        if (e.touches.length === 1 && (state.draggedNode || state.isPanning)) {
+        if (e.touches.length === 1 && state.isPanning) {
           e.preventDefault();
           const touch = e.touches[0];
           const moveDist = Math.hypot(
             touch.clientX - state.pointerStartX,
             touch.clientY - state.pointerStartY
           );
-          if (moveDist > DRAG_THRESHOLD_PX) state.didDrag = true;
-
-          if (state.draggedNode) {
-            const world = screenToWorld(touch.clientX, touch.clientY);
-            state.draggedNode.fx = world.x;
-            state.draggedNode.fy = world.y;
-            state.alpha = Math.max(state.alpha, 0.25);
-          } else if (state.isPanning) {
-            state.panX += touch.clientX - state.lastPointerX;
-            state.panY += touch.clientY - state.lastPointerY;
-            state.lastPointerX = touch.clientX;
-            state.lastPointerY = touch.clientY;
+          if (moveDist > DRAG_THRESHOLD_PX) {
+            state.didDrag = true;
+            if (state.hoveredNode) {
+              state.hoveredNode = null;
+            }
           }
+          state.panX += touch.clientX - state.lastPointerX;
+          state.panY += touch.clientY - state.lastPointerY;
+          state.lastPointerX = touch.clientX;
+          state.lastPointerY = touch.clientY;
           requestRender();
         } else if (e.touches.length === 2 && state.pinchStartDist) {
           e.preventDefault();
@@ -815,19 +771,14 @@
     );
 
     canvas.addEventListener('touchend', () => {
-      if (state.draggedNode) {
-        const tappedNode = state.draggedNode;
-        tappedNode.fx = null;
-        tappedNode.fy = null;
-        state.draggedNode = null;
-        if (!state.didDrag && tappedNode.url) {
-          window.location.href = tappedNode.url;
-          return;
-        }
-        reheatSimulation(0.15);
+      if (!state.didDrag && state.clickedNode && state.clickedNode.url) {
+        window.location.href = state.clickedNode.url;
+        return;
       }
       state.isPanning = false;
+      state.clickedNode = null;
       state.pinchStartDist = null;
+      requestRender();
     });
 
     // Controls
