@@ -42,3 +42,6 @@ enableRobotsTXT = true
   description = "A minimalist, dark-themed Hugo module demo."
   standaloneSection = "notes"
   github = "https://github.com/AlecGhost/spin"
+
+  [params.collectionColors]
+    tech = "#a6e3a1"
