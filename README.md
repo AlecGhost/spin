@@ -62,6 +62,25 @@ title = "My Site"
   description = "Site description" # Homepage subtitle and meta description
   github = "https://github.com/..."# Adds GitHub link to navbar and footer
   standaloneSection = "notes"      # Section excluded from collection cards (default: "notes")
+
+# Optional: fixed knowledge-graph colours per collection (keys are section names).
+# Collections not listed take the next free colour from the theme palette.
+[params.collectionColors]
+  tech = "#a6e3a1"
+  notes = "#89b4fa"                # the standalone section
+```
+
+### Knowledge graph colours
+
+The overview page's knowledge graph colours each collection automatically, in alphabetical order, from the theme palette. To change the palette itself, override these CSS variables (for example in a `<style>` block in `layouts/partials/head-extra.html`):
+
+```css
+:root {
+  --graph-palette: #a6e3a1, #fab387, #cba6f7, #f9e2af, #94e2d5, #f5c2e7, #74c7ec, #eba0ac;
+  --graph-standalone: #89b4fa;   /* standalone notes */
+  --graph-edge: #585b70;
+  --graph-edge-highlight: #89b4fa;
+}
 ```
 
 ## License

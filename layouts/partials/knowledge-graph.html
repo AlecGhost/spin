@@ -76,12 +76,35 @@
   {{- end -}}
 {{- end -}}
 
+{{- /* Optional per-collection colours from site config:
+       [params.collectionColors]
+         tech = "#a6e3a1"
+         notes = "#89b4fa"   # the standalone section
+     Anything not listed takes the next colour from the theme's --graph-palette. */ -}}
+{{- $colours := dict -}}
+{{- with site.Params.collectionColors -}}
+  {{- range $key, $value := . -}}
+    {{- $slug := lower $key -}}
+    {{- if eq $slug (lower $standalone) }}{{ $slug = "" }}{{ end -}}
+    {{- $colours = merge $colours (dict $slug (string $value)) -}}
+  {{- end -}}
+{{- end -}}
+
 {{- if gt (len $nodes) 0 -}}
 <section class="knowledge-graph-section" aria-label="Knowledge graph">
   <div class="knowledge-graph-card" id="knowledge-graph-card">
     <div class="knowledge-graph-header">
       <span class="knowledge-graph-label">Knowledge Graph</span>
       <div class="knowledge-graph-actions">
+        <button type="button" class="knowledge-graph-btn" id="knowledge-graph-zoom-out" aria-label="Zoom out" title="Zoom out">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button type="button" class="knowledge-graph-btn" id="knowledge-graph-zoom-in" aria-label="Zoom in" title="Zoom in">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        </button>
+        <button type="button" class="knowledge-graph-btn" id="knowledge-graph-fit" aria-label="Fit graph to view" title="Fit to view (double-click background)">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8V5a2 2 0 0 1 2-2h3"></path><path d="M16 3h3a2 2 0 0 1 2 2v3"></path><path d="M21 16v3a2 2 0 0 1-2 2h-3"></path><path d="M8 21H5a2 2 0 0 1-2-2v-3"></path><circle cx="12" cy="12" r="2.5"></circle></svg>
+        </button>
         <button type="button" class="knowledge-graph-btn" id="knowledge-graph-expand" aria-label="Toggle fullscreen graph" aria-expanded="false" title="Toggle fullscreen">
           <svg class="icon-expand" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 3 21 3 21 9"></polyline>
@@ -99,13 +122,15 @@
       </div>
     </div>
     <div class="knowledge-graph-viewport" id="knowledge-graph-viewport">
-      <canvas class="knowledge-graph-canvas" id="knowledge-graph-canvas"></canvas>
+      <canvas class="knowledge-graph-canvas" id="knowledge-graph-canvas" role="img" aria-label="Knowledge graph"></canvas>
+      <div class="knowledge-graph-tooltip" id="knowledge-graph-tooltip" hidden></div>
+      <div class="knowledge-graph-hint" id="knowledge-graph-hint" aria-hidden="true"></div>
       <div class="knowledge-graph-legend" id="knowledge-graph-legend" aria-hidden="true"></div>
       <div class="knowledge-graph-empty" id="knowledge-graph-empty" role="status" aria-live="polite">
         No entries matching the selected tags.
       </div>
     </div>
   </div>
-  <script type="application/json" id="knowledge-graph-data">{{ dict "nodes" $nodes "edges" $edges | jsonify | safeJS }}</script>
+  <script type="application/json" id="knowledge-graph-data">{{ dict "nodes" $nodes "edges" $edges "colours" $colours | jsonify | safeJS }}</script>
 </section>
 {{- end -}}
